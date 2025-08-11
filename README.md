@@ -53,4 +53,4 @@ Please open an issue for bug reports or feature requests.
 
 ## License
 
-This project is licensed under the [LICENSE](MIT License).
+This project is licensed under the [MIT License](LICENSE).
