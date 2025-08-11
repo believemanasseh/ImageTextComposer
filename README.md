@@ -1,6 +1,6 @@
 # Image Text Composer
 
-Image Text Composer is a web-based tool that allows users to upload PNG images and overlay them with fully customizable text. Built with [Next.js](https://nextjs.org) and [TypeScript](https://www.typescriptlang.org/docs/), it provides an intuitive interface for creating visually appealing image compositions for social media, presentations, and more.
+Image Text Composer is a web-based tool that allows users to upload PNG images and overlay them with fully customisable text. Built with [Next.js](https://nextjs.org) and [TypeScript](https://www.typescriptlang.org/docs/), it provides an intuitive interface for creating visually appealing image compositions for social media, presentations, and more.
 
 ## Features
 
@@ -18,8 +18,8 @@ Image Text Composer is a web-based tool that allows users to upload PNG images a
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/believemanasseh/imageTextComposer.git
-cd imageTextComposer
+git clone https://github.com/believemanasseh/ImageTextComposer.git
+cd ImageTextComposer
 npm install
 ```
 
