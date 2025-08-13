@@ -2,8 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
-import { Button, Slider } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { Button, Input, Popover, Slider } from "antd";
+import { ExclamationCircleOutlined, UploadOutlined } from "@ant-design/icons";
 import toastr from "toastr";
 import LayerList from "./components/LayerList";
 import ExportButton from "./components/ExportButton";
@@ -17,6 +17,8 @@ const DynamicImageComposer = dynamic(
 export default function Home() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageName, setImageName] = useState("");
+  const [editingName, setEditingName] = useState(false);
+  const [tempName, setTempName] = useState("");
   const [imgElement, setImgElement] = useState<HTMLImageElement | null>(null);
   const [zoom, setZoom] = useState(1);
   const [layers, setLayers] = useState<string[]>([]);
@@ -24,14 +26,14 @@ export default function Home() {
   const handleManualUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files as FileList;
     const file = files[0];
-    console.log(file, "filld", file.type);
+
     if (file) {
       if (file.type !== "image/png") {
         toastr.error("Only PNG files are allowed.");
         return;
       }
       setImageUrl(URL.createObjectURL(file));
-      setImageName(file.name);
+      setImageName(file.name.slice(0, -4)); // Remove .png extension
       toastr.success(`Image "${file.name}" uploaded successfully`);
     }
   };
@@ -47,6 +49,30 @@ export default function Home() {
   function handleImageUpload() {
     document.getElementById("imageUpload")?.click();
   }
+
+  const handleEditName = () => {
+    setEditingName(true);
+    setTempName(imageName);
+  };
+
+  const handleSaveName = () => {
+    setEditingName(false);
+    setImageName(tempName);
+    setTempName("");
+  };
+
+  const namePopoverContent = (
+    <div className="flex flex-col gap-2">
+      <Input
+        value={tempName}
+        onChange={(e) => setTempName(e.target.value)}
+        autoFocus
+      />
+      <Button type="primary" size="small" onClick={handleSaveName}>
+        Save
+      </Button>
+    </div>
+  );
 
   return (
     <main className="pt-10 flex items-center justify-center min-h-screen bg-[#f5f6fa]">
@@ -79,7 +105,23 @@ export default function Home() {
           <section>
             <div className="flex items-center justify-between border-b border-[#e5e7eb] gap-4">
               <UndoRedoControls />
-              <h1>{imageName}</h1>
+              <Popover
+                content={namePopoverContent}
+                trigger="click"
+                open={editingName}
+                onOpenChange={setEditingName}
+                placement="bottom"
+              >
+                <h1 className="text-[#222] flex items-center gap-2 cursor-pointer">
+                  {imageName || "Untitled Image"}
+                  <Button
+                    icon={
+                      <ExclamationCircleOutlined style={{ fontSize: "25px" }} />
+                    }
+                    onClick={handleEditName}
+                  />
+                </h1>
+              </Popover>
               <ExportButton />
             </div>
 
