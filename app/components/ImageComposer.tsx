@@ -8,14 +8,18 @@ type ImageComposerProps = {
 
 export default function ImageComposer(ImageComposerProps: ImageComposerProps) {
   return (
-    <Stage width={800} height={600}>
+    <Stage
+      width={ImageComposerProps.imgElement.naturalWidth}
+      height={ImageComposerProps.imgElement.naturalHeight}
+    >
       <Layer>
         <KonvaImage
           image={ImageComposerProps.imgElement}
           x={0}
           y={0}
-          width={800}
-          height={600}
+          width={ImageComposerProps.imgElement.naturalWidth}
+          height={ImageComposerProps.imgElement.naturalHeight}
+          draggable
         />
       </Layer>
     </Stage>
