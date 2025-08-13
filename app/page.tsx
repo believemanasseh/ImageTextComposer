@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
-import { Button } from "antd";
+import { Button, Slider } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import toastr from "toastr";
 
@@ -14,6 +14,7 @@ const DynamicImageComposer = dynamic(
 export default function Home() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imgElement, setImgElement] = useState<HTMLImageElement | null>(null);
+  const [zoom, setZoom] = useState(1);
 
   const handleManualUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files as FileList;
@@ -65,8 +66,36 @@ export default function Home() {
           />
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center w-[960px] m-auto p-5 rounded-lg shadow-md bg-[whitesmoke]">
-          <DynamicImageComposer imgElement={imgElement} />
+        <div className="flex flex-col items-center justify-center w-full h-full">
+          {/* Zoom control */}
+          <div className="mb-4 flex items-center gap-4">
+            <label htmlFor="zoom-slider">Zoom:</label>
+            <Slider
+              id="zoom-slider"
+              min={0.1}
+              max={3}
+              step={0.01}
+              value={zoom}
+              onChange={setZoom}
+              style={{ width: 200 }}
+            />
+            <span>{(zoom * 100).toFixed(0)}%</span>
+          </div>
+
+          <div
+            style={{
+              width: "80vw",
+              height: "80vh",
+              overflow: "hidden",
+              border: "1px solid #eee",
+              background: "whitesmoke",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <DynamicImageComposer imgElement={imgElement} zoom={zoom} />
+          </div>
         </div>
       )}
     </main>
