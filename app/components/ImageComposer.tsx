@@ -7,24 +7,20 @@ type ImageComposerProps = {
   zoom: number;
 };
 
-export default function ImageComposer(ImageComposerProps: ImageComposerProps) {
+export default function ImageComposer(props: ImageComposerProps) {
   return (
     <Stage
-      width={
-        ImageComposerProps.imgElement.naturalWidth * ImageComposerProps.zoom
-      }
-      height={
-        ImageComposerProps.imgElement.naturalHeight * ImageComposerProps.zoom
-      }
-      scale={{ x: ImageComposerProps.zoom, y: ImageComposerProps.zoom }}
+      width={props.imgElement.naturalWidth * props.zoom}
+      height={props.imgElement.naturalHeight * props.zoom}
+      scale={{ x: props.zoom, y: props.zoom }}
     >
       <Layer>
         <KonvaImage
-          image={ImageComposerProps.imgElement}
+          image={props.imgElement}
           x={0}
           y={0}
-          width={ImageComposerProps.imgElement.naturalWidth}
-          height={ImageComposerProps.imgElement.naturalHeight}
+          width={props.imgElement.naturalWidth}
+          height={props.imgElement.naturalHeight}
           draggable
         />
       </Layer>
