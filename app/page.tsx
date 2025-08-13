@@ -1,26 +1,73 @@
 "use client";
 
-import { useState } from "react";
+import dynamic from "next/dynamic";
+import { useState, useEffect } from "react";
 import { Button } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
+import toastr from "toastr";
+
+const DynamicImageComposer = dynamic(
+  () => import("./components/ImageComposer"),
+  { ssr: false }
+);
 
 export default function Home() {
-  const [image, setImage] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imgElement, setImgElement] = useState<HTMLImageElement | null>(null);
+
+  const handleManualUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files as FileList;
+    const file = files[0];
+    console.log(file, "filld", file.type);
+    if (file) {
+      if (file.type !== "image/png") {
+        toastr.error("Only PNG files are allowed.");
+        return;
+      }
+      setImageUrl(URL.createObjectURL(file));
+      toastr.success(`Image "${file.name}" uploaded successfully`);
+    }
+  };
+
+  useEffect(() => {
+    if (imageUrl) {
+      const img = new window.Image();
+      img.src = imageUrl;
+      img.onload = () => setImgElement(img);
+    }
+  }, [imageUrl]);
+
+  function handleImageUpload() {
+    document.getElementById("imageUpload")?.click();
+  }
 
   return (
     <main className="pt-10 flex items-center justify-center min-h-screen">
-      {!image ? (
+      {!imgElement ? (
         <div className="flex flex-col gap-5 w-[960px] m-auto p-5 items-center justify-center rounded-lg shadow-md bg-[whitesmoke]">
           <h1 className="text-2xl">Image Text Composer</h1>
           <p className="text-gray-500">
             Upload a PNG image and overlay it with fully customisable text.
           </p>
-          <Button type="primary" icon={<UploadOutlined />}>
+          <Button
+            type="primary"
+            onClick={handleImageUpload}
+            icon={<UploadOutlined />}
+          >
             Upload your image
           </Button>
+          <input
+            id="imageUpload"
+            type="file"
+            onChange={handleManualUpload}
+            className="hidden"
+            accept=".png"
+          />
         </div>
       ) : (
-        <div>TODO</div>
+        <div className="flex flex-col items-center justify-center w-[960px] m-auto p-5 rounded-lg shadow-md bg-[whitesmoke]">
+          <DynamicImageComposer imgElement={imgElement} />
+        </div>
       )}
     </main>
   );
