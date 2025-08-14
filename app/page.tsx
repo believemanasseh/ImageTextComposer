@@ -1,13 +1,17 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button, Input, Popover, Slider } from "antd";
 import { ExclamationCircleOutlined, UploadOutlined } from "@ant-design/icons";
 import toastr from "toastr";
 import LayerList from "./components/LayerList";
 import ExportButton from "./components/ExportButton";
 import UndoRedoControls from "./components/UndoRedoControls";
+import { TextLayer, TransformEvent } from "./types";
+import { Text } from "konva/lib/shapes/Text";
+import { Transformer } from "konva/lib/shapes/Transformer";
+import { KonvaEventObject } from "konva/lib/Node";
 
 const DynamicImageComposer = dynamic(
   () => import("./components/ImageComposer"),
@@ -21,7 +25,13 @@ export default function Home() {
   const [tempName, setTempName] = useState("");
   const [imgElement, setImgElement] = useState<HTMLImageElement | null>(null);
   const [zoom, setZoom] = useState(1);
-  const [layers, setLayers] = useState<string[]>([]);
+  const [layers, setLayers] = useState<TextLayer[]>([]);
+  const [redoStack, setRedoStack] = useState<TextLayer[]>([]);
+  const [text, setText] = useState("Some text here");
+  const [isEditing, setIsEditing] = useState(false);
+  const [textWidth, setTextWidth] = useState(200);
+  const textRef = useRef<Text>(null) as React.RefObject<Text>;
+  const trRef = useRef<Transformer>(null) as React.RefObject<Transformer>;
 
   const handleManualUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files as FileList;
@@ -59,6 +69,45 @@ export default function Home() {
     setEditingName(false);
     setImageName(tempName);
     setTempName("");
+  };
+
+  const handleTextDblClick = useCallback((evt: KonvaEventObject<Event>) => {
+    const node = evt.target as Text;
+    const currentText = node.text();
+    textRef.current = node;
+    setIsEditing(true);
+    setText(currentText);
+  }, []);
+
+  const handleTextChange = useCallback((newText: string) => {
+    setText(newText);
+  }, []);
+
+  const handleTransform = useCallback((e: TransformEvent) => {
+    const node = textRef.current;
+    if (!node) return;
+    const scaleX = node.scaleX();
+    const newWidth = node.width() * scaleX;
+    setTextWidth(newWidth);
+    node.setAttrs({
+      width: newWidth,
+      scaleX: 1,
+    });
+  }, []);
+
+  const handleUndo = () => {
+    if (layers.length === 0) return;
+    const newLayers = layers.slice(0, -1);
+    const removedLayer = layers[layers.length - 1];
+    setLayers(newLayers);
+    setRedoStack([...redoStack, removedLayer]);
+  };
+
+  const handleRedo = () => {
+    if (redoStack.length === 0) return;
+    const restoredLayer = redoStack[redoStack.length - 1];
+    setLayers([...layers, restoredLayer]);
+    setRedoStack(redoStack.slice(0, -1));
   };
 
   const namePopoverContent = (
@@ -100,11 +149,35 @@ export default function Home() {
       ) : (
         <div className="flex flex-row justify-center w-full h-full gap-2">
           <aside className="w-64 p-4 bg-white border-r border-[#e5e7eb] flex flex-col gap-4">
+            <Button
+              type="primary"
+              onClick={() => {
+                setLayers([
+                  ...layers,
+                  {
+                    id: Date.now().toString(),
+                    text: text,
+                    x: 100,
+                    y: 100,
+                    fontSize: 32,
+                    draggable: true,
+                    width: textWidth,
+                    onDblClick: handleTextDblClick,
+                    onDblTap: handleTextDblClick,
+                    onTransform: handleTransform,
+                    visible: !isEditing,
+                  },
+                ]);
+              }}
+              block
+            >
+              Add Text
+            </Button>
             <LayerList layers={layers} />
           </aside>
           <section>
             <div className="flex items-center justify-between border-b border-[#e5e7eb] gap-4">
-              <UndoRedoControls />
+              <UndoRedoControls onRedo={handleRedo} onUndo={handleUndo} />
               <Popover
                 content={namePopoverContent}
                 trigger="click"
@@ -137,7 +210,16 @@ export default function Home() {
                 justifyContent: "center",
               }}
             >
-              <DynamicImageComposer imgElement={imgElement} zoom={zoom} />
+              <DynamicImageComposer
+                imgElement={imgElement}
+                zoom={zoom}
+                layers={layers}
+                textRef={textRef}
+                trRef={trRef}
+                isEditing={isEditing}
+                setIsEditing={setIsEditing}
+                handleTextChange={handleTextChange}
+              />
             </div>
 
             {/* Zoom control */}

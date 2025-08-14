@@ -1,6 +1,8 @@
 "use client";
 
-type LayerListProps = { layers: string[] };
+import { TextLayer } from "../types";
+
+type LayerListProps = { layers: TextLayer[] };
 
 export default function LayerList(props: LayerListProps) {
   return (
@@ -9,9 +11,7 @@ export default function LayerList(props: LayerListProps) {
       <ul>
         <li>Image Layer</li>
         {props.layers.map((layer, index) => (
-          <li key={index} className="pl-4">
-            {layer}
-          </li>
+          <li key={index}>{layer.text}</li>
         ))}
       </ul>
     </div>
