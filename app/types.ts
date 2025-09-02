@@ -1,7 +1,9 @@
 import { KonvaEventObject } from "konva/lib/Node";
+import { Text } from "konva/lib/shapes/Text";
+import { Transformer } from "konva/lib/shapes/Transformer";
 
 export type TextLayer = {
-  id: string;
+  id: number;
   text: string;
   x: number;
   y: number;
@@ -12,6 +14,7 @@ export type TextLayer = {
   onDblTap: (evt: KonvaEventObject<Event>) => void;
   onTransform: (e: TransformEvent) => void;
   visible: boolean;
+  textRef: React.RefObject<Text> | null;
 };
 
 export type TransformEventTarget = {

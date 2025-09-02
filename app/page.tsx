@@ -1,17 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Input, Popover, Slider } from "antd";
 import { ExclamationCircleOutlined, UploadOutlined } from "@ant-design/icons";
 import toastr from "toastr";
-import LayerList from "./components/LayerList";
 import ExportButton from "./components/ExportButton";
 import UndoRedoControls from "./components/UndoRedoControls";
-import { TextLayer, TransformEvent } from "./types";
-import { Text } from "konva/lib/shapes/Text";
-import { Transformer } from "konva/lib/shapes/Transformer";
-import { KonvaEventObject } from "konva/lib/Node";
+import { TextLayer } from "./types";
+import { LayersContext } from "./contexts";
 
 const DynamicImageComposer = dynamic(
   () => import("./components/ImageComposer"),
@@ -27,11 +24,7 @@ export default function Home() {
   const [zoom, setZoom] = useState(1);
   const [layers, setLayers] = useState<TextLayer[]>([]);
   const [redoStack, setRedoStack] = useState<TextLayer[]>([]);
-  const [text, setText] = useState("Some text here");
-  const [isEditing, setIsEditing] = useState(false);
-  const [textWidth, setTextWidth] = useState(200);
-  const textRef = useRef<Text>(null) as React.RefObject<Text>;
-  const trRef = useRef<Transformer>(null) as React.RefObject<Transformer>;
+  const [text, setText] = useState("");
 
   const handleManualUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files as FileList;
@@ -71,30 +64,6 @@ export default function Home() {
     setTempName("");
   };
 
-  const handleTextDblClick = useCallback((evt: KonvaEventObject<Event>) => {
-    const node = evt.target as Text;
-    const currentText = node.text();
-    textRef.current = node;
-    setIsEditing(true);
-    setText(currentText);
-  }, []);
-
-  const handleTextChange = useCallback((newText: string) => {
-    setText(newText);
-  }, []);
-
-  const handleTransform = useCallback((e: TransformEvent) => {
-    const node = textRef.current;
-    if (!node) return;
-    const scaleX = node.scaleX();
-    const newWidth = node.width() * scaleX;
-    setTextWidth(newWidth);
-    node.setAttrs({
-      width: newWidth,
-      scaleX: 1,
-    });
-  }, []);
-
   const handleUndo = () => {
     if (layers.length === 0) return;
     const newLayers = layers.slice(0, -1);
@@ -124,121 +93,113 @@ export default function Home() {
   );
 
   return (
-    <main className="pt-10 flex items-center justify-center min-h-screen bg-[#f5f6fa]">
-      {!imgElement ? (
-        <div className="flex flex-col gap-5 w-[960px] m-auto p-5 items-center justify-center rounded-lg shadow-md bg-[whitesmoke]">
-          <h1 className="text-2xl text-[#222]">Image Text Composer</h1>
-          <p className="text-gray-500">
-            Upload a PNG image and overlay it with fully customisable text.
-          </p>
-          <Button
-            type="primary"
-            onClick={handleImageUpload}
-            icon={<UploadOutlined />}
-          >
-            Upload your image
-          </Button>
-          <input
-            id="imageUpload"
-            type="file"
-            onChange={handleManualUpload}
-            className="hidden"
-            accept=".png"
-          />
-        </div>
-      ) : (
-        <div className="flex flex-row justify-center w-full h-full gap-2">
-          <aside className="w-64 p-4 bg-white border-r border-[#e5e7eb] flex flex-col gap-4">
+    <LayersContext value={layers}>
+      <main className="pt-10 flex items-center justify-center min-h-screen bg-[#f5f6fa]">
+        {!imgElement ? (
+          <div className="flex flex-col gap-5 w-[960px] m-auto p-5 items-center justify-center rounded-lg shadow-md bg-[whitesmoke]">
+            <h1 className="text-2xl text-[#222]">Image Text Composer</h1>
+            <p className="text-gray-500">
+              Upload a PNG image and overlay it with fully customisable text.
+            </p>
             <Button
               type="primary"
-              onClick={() => {
-                setLayers([
-                  ...layers,
-                  {
-                    id: Date.now().toString(),
-                    text: text,
-                    x: 100,
-                    y: 100,
-                    fontSize: 32,
-                    draggable: true,
-                    width: textWidth,
-                    onDblClick: handleTextDblClick,
-                    onDblTap: handleTextDblClick,
-                    onTransform: handleTransform,
-                    visible: !isEditing,
-                  },
-                ]);
-              }}
-              block
+              onClick={handleImageUpload}
+              icon={<UploadOutlined />}
             >
-              Add Text
+              Upload your image
             </Button>
-            <LayerList layers={layers} />
-          </aside>
-          <section>
-            <div className="flex items-center justify-between border-b border-[#e5e7eb] gap-4">
-              <UndoRedoControls onRedo={handleRedo} onUndo={handleUndo} />
-              <Popover
-                content={namePopoverContent}
-                trigger="click"
-                open={editingName}
-                onOpenChange={setEditingName}
-                placement="bottom"
+            <input
+              id="imageUpload"
+              type="file"
+              onChange={handleManualUpload}
+              className="hidden"
+              accept=".png"
+            />
+          </div>
+        ) : (
+          <div className="flex flex-row justify-center w-full h-full gap-2">
+            <aside className="w-64 p-4 bg-white border-r border-[#e5e7eb] flex flex-col gap-4">
+              <Button
+                type="primary"
+                onClick={() => {
+                  setText("New text");
+                }}
+                block
               >
-                <h1 className="text-[#222] flex items-center gap-2 cursor-pointer">
-                  {imageName || "Untitled Image"}
-                  <Button
-                    icon={
-                      <ExclamationCircleOutlined style={{ fontSize: "25px" }} />
-                    }
-                    onClick={handleEditName}
-                  />
-                </h1>
-              </Popover>
-              <ExportButton />
-            </div>
+                Add Text
+              </Button>
+              {/* <LayerList layers={layers} /> */}
+              <div>
+                <h2 className="font-bold mb-2">Layers</h2>
+                <ul className="leading-[2]">
+                  <li className="cursor-pointer">Image Layer</li>
+                  <li className="cursor-pointer">{text}</li>
+                </ul>
+              </div>
+            </aside>
+            <section>
+              <div className="flex items-center justify-between border-b border-[#e5e7eb] gap-4">
+                <UndoRedoControls onRedo={handleRedo} onUndo={handleUndo} />
+                <Popover
+                  content={namePopoverContent}
+                  trigger="click"
+                  open={editingName}
+                  onOpenChange={setEditingName}
+                  placement="bottom"
+                >
+                  <h1 className="text-[#222] flex items-center gap-2 cursor-pointer">
+                    {imageName || "Untitled Image"}
+                    <Button
+                      icon={
+                        <ExclamationCircleOutlined
+                          style={{ fontSize: "25px" }}
+                        />
+                      }
+                      onClick={handleEditName}
+                    />
+                  </h1>
+                </Popover>
+                <ExportButton />
+              </div>
 
-            <div
-              style={{
-                width: "80vw",
-                height: "80vh",
-                overflow: "hidden",
-                border: "1px solid #e5e7eb",
-                background: "#f8fafc",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <DynamicImageComposer
-                imgElement={imgElement}
-                zoom={zoom}
-                layers={layers}
-                textRef={textRef}
-                trRef={trRef}
-                isEditing={isEditing}
-                setIsEditing={setIsEditing}
-                handleTextChange={handleTextChange}
-              />
-            </div>
+              <div
+                style={{
+                  width: "80vw",
+                  height: "80vh",
+                  overflow: "hidden",
+                  border: "1px solid #e5e7eb",
+                  background: "#f8fafc",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <DynamicImageComposer
+                  imgElement={imgElement}
+                  zoom={zoom}
+                  text={text}
+                  setText={setText}
+                />
+              </div>
 
-            {/* Zoom control */}
-            <div className="mt-4 flex items-center justify-center gap-4">
-              <label htmlFor="zoom-slider">Zoom:</label>
-              <Slider
-                id="zoom-slider"
-                min={0.1}
-                max={3}
-                step={0.01}
-                value={zoom}
-                onChange={setZoom}
-                style={{ width: 200 }}
-              />
-              <span>{(zoom * 100).toFixed(0)}%</span>
-            </div>
-          </section>
-        </div>
-      )}
-    </main>
+              {/* Zoom control */}
+              <div className="mt-4 flex items-center justify-center gap-4">
+                <label htmlFor="zoom-slider">Zoom:</label>
+                <Slider
+                  id="zoom-slider"
+                  min={0.1}
+                  max={3}
+                  step={0.01}
+                  value={zoom}
+                  onChange={setZoom}
+                  style={{ width: 200 }}
+                />
+                <span>{(zoom * 100).toFixed(0)}%</span>
+              </div>
+            </section>
+          </div>
+        )}
+      </main>
+    </LayersContext>
   );
 }
