@@ -1,31 +1,30 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useState, useCallback, useContext } from "react";
 import {
   Stage,
   Layer,
   Image as KonvaImage,
-  Text as KonvaText,
-  Transformer as TransformerComponent,
+  Text,
+  Transformer,
 } from "react-konva";
 import { TransformEvent } from "../types";
 import TextEditor from "./TextEditor";
-import { Text } from "konva/lib/shapes/Text";
-import { KonvaEventObject } from "konva/lib/Node";
-import { Transformer } from "konva/lib/shapes/Transformer";
+import Konva from "konva";
+import { TextContext } from "../contexts";
 
 type ImageComposerProps = {
   imgElement: HTMLImageElement;
   zoom: number;
-  text: string;
-  setText: (text: string) => void;
 };
 
 export default function ImageComposer(props: ImageComposerProps) {
+  const [text, setText] = useContext(TextContext);
   const [isEditing, setIsEditing] = useState(false);
   const [textWidth, setTextWidth] = useState(200);
-  const textRef = useRef<Text>(null);
-  const trRef = useRef<Transformer>(null);
+  const [position, setPosition] = useState([50, 80]);
+  const textRef = useRef<Konva.Text>(null);
+  const trRef = useRef<Konva.Transformer>(null);
 
   useEffect(() => {
     if (trRef.current && textRef.current) {
@@ -33,25 +32,32 @@ export default function ImageComposer(props: ImageComposerProps) {
     }
   }, [isEditing]);
 
-  const handleTextDblClick = useCallback((evt: KonvaEventObject<Event>) => {
-    setIsEditing(true);
-  }, []);
+  const handleDragEnd = (evt: Konva.KonvaEventObject<DragEvent>) => {
+    const { x, y } = evt.target.attrs;
+    setPosition([x, y]);
+  };
 
-  const handleTextChange = useCallback(
-    (newText: string) => {
-      props.setText(newText);
+  const handleTextDblClick = useCallback(
+    (evt: Konva.KonvaEventObject<Event>) => {
+      requestAnimationFrame(() => setIsEditing(true));
     },
-    [props]
+    []
   );
 
+  const handleTextChange = useCallback((newText: string) => {
+    setText(newText);
+  }, []);
+
   const handleTransform = useCallback((e: TransformEvent) => {
-    const node = e.target as Text;
-    const scaleX = node.scaleX();
-    const newWidth = node.width() * scaleX;
-    node.setAttrs({
-      width: newWidth,
-      scaleX: 1,
-    });
+    const node = textRef.current;
+    if (node) {
+      const scaleX = node.scaleX();
+      const newWidth = node.width() * scaleX;
+      node.setAttrs({
+        width: newWidth,
+        scaleX: 1,
+      });
+    }
   }, []);
 
   return (
@@ -63,26 +69,25 @@ export default function ImageComposer(props: ImageComposerProps) {
       <Layer>
         <KonvaImage
           image={props.imgElement}
-          x={0}
-          y={0}
           width={props.imgElement.naturalWidth}
           height={props.imgElement.naturalHeight}
         />
-
-        <KonvaText
+        <Text
           ref={textRef}
-          text={props.text}
-          x={50}
-          y={80}
+          text={text}
+          x={position[0]}
+          y={position[1]}
           fontSize={20}
           draggable
           width={textWidth}
           onDblClick={handleTextDblClick}
           onDblTap={handleTextDblClick}
           onTransform={handleTransform}
+          onDragEnd={handleDragEnd}
           visible={!isEditing}
         />
-        {isEditing && (
+
+        {isEditing && textRef.current && (
           <TextEditor
             textNode={textRef.current}
             onChange={handleTextChange}
@@ -90,8 +95,9 @@ export default function ImageComposer(props: ImageComposerProps) {
           />
         )}
         {!isEditing && (
-          <TransformerComponent
+          <Transformer
             ref={trRef}
+            visible={!text ? isEditing : !isEditing}
             enabledAnchors={["middle-left", "middle-right"]}
             boundBoxFunc={(oldBox, newBox) => ({
               ...newBox,

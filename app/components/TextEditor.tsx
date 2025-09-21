@@ -1,9 +1,9 @@
-import { Text } from "konva/lib/shapes/Text";
+import Konva from "konva";
 import { useEffect, useRef } from "react";
 import { Html } from "react-konva-utils";
 
 type TextEditorProps = {
-  textNode: Text | null;
+  textNode: Konva.Text;
   onChange: (newText: string) => void;
   onClose: () => void;
 };
@@ -14,7 +14,7 @@ const TextEditor = (props: TextEditorProps) => {
 
   useEffect(() => {
     setTimeout(() => {
-      if (!textareaRef.current || !textNode) return;
+      if (!textareaRef.current) return;
 
       const textarea = textareaRef.current;
 
@@ -92,16 +92,14 @@ const TextEditor = (props: TextEditorProps) => {
 
       textarea.addEventListener("keydown", handleKeyDown);
       textarea.addEventListener("input", handleInput);
-      setTimeout(() => {
-        window.addEventListener("click", handleOutsideClick);
-      });
+      window.addEventListener("click", handleOutsideClick);
 
       return () => {
         textarea.removeEventListener("keydown", handleKeyDown);
         textarea.removeEventListener("input", handleInput);
         window.removeEventListener("click", handleOutsideClick);
       };
-    }, 100);
+    });
   }, [textNode, onChange, onClose]);
 
   return (
