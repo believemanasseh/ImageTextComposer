@@ -30,6 +30,14 @@ export default function Home() {
   const textRef = useRef<Konva.Text>(null);
   const trRef = useRef<Konva.Transformer>(null);
 
+  useEffect(() => {
+    if (imageUrl) {
+      const img = new window.Image();
+      img.src = imageUrl;
+      img.onload = () => setImgElement(img);
+    }
+  }, [imageUrl]);
+
   const handleManualUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files as FileList;
     const file = files[0];
@@ -45,17 +53,9 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    if (imageUrl) {
-      const img = new window.Image();
-      img.src = imageUrl;
-      img.onload = () => setImgElement(img);
-    }
-  }, [imageUrl]);
-
-  function handleImageUpload() {
+  const handleImageUpload = () => {
     document.getElementById("imageUpload")?.click();
-  }
+  };
 
   const handleEditName = () => {
     setEditingName(true);
@@ -139,7 +139,7 @@ export default function Home() {
 
   return (
     <TextContext value={[text, setText]}>
-      <LayersContext value={layers}>
+      <LayersContext value={[layers, setLayers]}>
         <main className="pt-10 flex items-center justify-center min-h-screen bg-[#f5f6fa]">
           {!imgElement ? (
             <div className="flex flex-col gap-5 w-[960px] m-auto p-5 items-center justify-center rounded-lg shadow-md bg-[whitesmoke]">
@@ -173,8 +173,8 @@ export default function Home() {
                       {
                         id: Date.now(),
                         text: "New Text",
-                        x: 50,
-                        y: 50,
+                        x: 600,
+                        y: 400,
                         fontFamily: "Arial",
                         fontSize: 20,
                         fontStyle: "normal",

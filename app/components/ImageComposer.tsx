@@ -8,6 +8,7 @@ import {
   Text,
   Transformer,
 } from "react-konva";
+import Konva from "konva";
 import TextEditor from "./TextEditor";
 import { LayersContext } from "../contexts";
 
@@ -17,7 +18,7 @@ type ImageComposerProps = {
 };
 
 export default function ImageComposer(props: ImageComposerProps) {
-  const layers = useContext(LayersContext);
+  const [layers, setLayers] = useContext(LayersContext);
 
   useEffect(() => {
     layers.map((layer) => {
@@ -27,10 +28,17 @@ export default function ImageComposer(props: ImageComposerProps) {
     });
   }, [layers]);
 
-  // const handleDragEnd = (evt: Konva.KonvaEventObject<DragEvent>) => {
-  //   const { x, y } = evt.target.attrs;
-  //   setPosition([x, y]);
-  // };
+  const handleDragEnd = (
+    evt: Konva.KonvaEventObject<DragEvent>,
+    id: number
+  ) => {
+    const { x, y } = evt.target.attrs;
+    setLayers(
+      layers.map((layer) =>
+        id === layer.id ? { ...layer, x: x, y: y } : layer
+      )
+    );
+  };
 
   return (
     <Stage
@@ -61,7 +69,7 @@ export default function ImageComposer(props: ImageComposerProps) {
               onDblClick={(e) => layer.onDblClick(e, layer.id)}
               onDblTap={(e) => layer.onDblClick(e, layer.id)}
               onTransform={layer.onTransform}
-              // onDragEnd={handleDragEnd}
+              onDragEnd={(e) => handleDragEnd(e, layer.id)}
               visible={!layer.isEditing}
             />
 
