@@ -1,13 +1,15 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Button, Input, Popover, Slider } from "antd";
 import { ExclamationCircleOutlined, UploadOutlined } from "@ant-design/icons";
 import toastr from "toastr";
+import Konva from "konva";
 import ExportButton from "./components/ExportButton";
 import UndoRedoControls from "./components/UndoRedoControls";
-import { TextLayer } from "./types";
+import LayerList from "./components/LayerList";
+import { TextLayer, TransformEvent } from "./types";
 import { LayersContext, TextContext } from "./contexts";
 
 const DynamicImageComposer = dynamic(
@@ -22,9 +24,11 @@ export default function Home() {
   const [editingName, setEditingName] = useState(false);
   const [tempName, setTempName] = useState("");
   const [imgElement, setImgElement] = useState<HTMLImageElement | null>(null);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoom] = useState(0.75);
   const [layers, setLayers] = useState<TextLayer[]>([]);
   const [redoStack, setRedoStack] = useState<TextLayer[]>([]);
+  const textRef = useRef<Konva.Text>(null);
+  const trRef = useRef<Konva.Transformer>(null);
 
   const handleManualUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files as FileList;
@@ -79,6 +83,47 @@ export default function Home() {
     setRedoStack(redoStack.slice(0, -1));
   };
 
+  const handleTextChange = useCallback((id: number, newText: string) => {
+    setLayers((prevLayers) =>
+      prevLayers.map((layer) =>
+        layer.id === id ? { ...layer, text: newText } : layer
+      )
+    );
+  }, []);
+
+  const setIsEditing = (id: number, isEditing: boolean) => {
+    setLayers((prevLayers) =>
+      prevLayers.map((layer) =>
+        layer.id === id ? { ...layer, isEditing } : layer
+      )
+    );
+  };
+
+  const handleTextDblClick = useCallback(
+    (evt: Konva.KonvaEventObject<Event>, id: number) => {
+      requestAnimationFrame(() =>
+        setLayers((prevLayers) =>
+          prevLayers.map((layer) =>
+            layer.id === id ? { ...layer, isEditing: true } : layer
+          )
+        )
+      );
+    },
+    []
+  );
+
+  const handleTransform = useCallback((e: TransformEvent) => {
+    const node = textRef.current;
+    if (node) {
+      const scaleX = node.scaleX();
+      const newWidth = node.width() * scaleX;
+      node.setAttrs({
+        width: newWidth,
+        scaleX: 1,
+      });
+    }
+  }, []);
+
   const namePopoverContent = (
     <div className="flex flex-col gap-2">
       <Input
@@ -123,20 +168,37 @@ export default function Home() {
                 <Button
                   type="primary"
                   onClick={() => {
-                    setText("New text");
+                    setLayers([
+                      ...layers,
+                      {
+                        id: Date.now(),
+                        text: "New Text",
+                        x: 50,
+                        y: 50,
+                        fontSize: 20,
+                        fontStyle: "italic",
+                        align: "left",
+                        opacity: 0.75,
+                        fill: "black",
+                        draggable: true,
+                        width: 200,
+                        onDblClick: handleTextDblClick,
+                        onDblTap: handleTextDblClick,
+                        onTransform: handleTransform,
+                        visible: true,
+                        textRef: textRef,
+                        trRef: trRef,
+                        isEditing: false,
+                        setIsEditing: setIsEditing,
+                        handleTextChange: handleTextChange,
+                      },
+                    ]);
                   }}
                   block
                 >
                   Add Text
                 </Button>
-                {/* <LayerList layers={layers} /> */}
-                <div>
-                  <h2 className="font-bold mb-2">Layers</h2>
-                  <ul className="leading-[2]">
-                    <li className="cursor-pointer">Image Layer</li>
-                    <li className="cursor-pointer">{text}</li>
-                  </ul>
-                </div>
+                <LayerList />
               </aside>
               <section>
                 <div className="flex items-center justify-between border-b border-[#e5e7eb] gap-4">

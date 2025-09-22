@@ -1,6 +1,4 @@
-import { KonvaEventObject } from "konva/lib/Node";
-import { Text } from "konva/lib/shapes/Text";
-import { Transformer } from "konva/lib/shapes/Transformer";
+import Konva from "konva";
 
 export type TextLayer = {
   id: number;
@@ -8,13 +6,21 @@ export type TextLayer = {
   x: number;
   y: number;
   fontSize: number;
+  fontStyle: string;
+  align: string;
+  opacity: number;
+  fill: string;
   draggable: boolean;
   width: number;
-  onDblClick: (evt: KonvaEventObject<Event>) => void;
-  onDblTap: (evt: KonvaEventObject<Event>) => void;
+  onDblClick: (evt: Konva.KonvaEventObject<Event>, id: number) => void;
+  onDblTap: (evt: Konva.KonvaEventObject<Event>, id: number) => void;
   onTransform: (e: TransformEvent) => void;
   visible: boolean;
-  textRef: React.RefObject<Text> | null;
+  textRef: React.RefObject<Konva.Text | null>;
+  trRef: React.RefObject<Konva.Transformer | null>;
+  isEditing: boolean;
+  setIsEditing: (id: number, isEditing: boolean) => void;
+  handleTextChange: (id: number, text: string) => void;
 };
 
 export type TransformEventTarget = {

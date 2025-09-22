@@ -1,16 +1,17 @@
 "use client";
 
-import { TextLayer } from "../types";
+import { useContext } from "react";
+import { LayersContext } from "../contexts";
 
-type LayerListProps = { layers: TextLayer[] };
+export default function LayerList() {
+  const layers = useContext(LayersContext);
 
-export default function LayerList(props: LayerListProps) {
   return (
     <div>
       <h2 className="font-bold mb-2">Layers</h2>
       <ul className="leading-[2]">
         <li className="cursor-pointer">Image Layer</li>
-        {props.layers.map((layer, index) => (
+        {layers.map((layer, index) => (
           <li className="cursor-pointer" key={index}>
             {layer.text}
           </li>

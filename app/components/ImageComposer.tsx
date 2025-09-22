@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, useCallback, useContext } from "react";
+import React, { useEffect, useContext } from "react";
 import {
   Stage,
   Layer,
@@ -8,10 +8,8 @@ import {
   Text,
   Transformer,
 } from "react-konva";
-import { TransformEvent } from "../types";
 import TextEditor from "./TextEditor";
-import Konva from "konva";
-import { TextContext } from "../contexts";
+import { LayersContext } from "../contexts";
 
 type ImageComposerProps = {
   imgElement: HTMLImageElement;
@@ -19,46 +17,20 @@ type ImageComposerProps = {
 };
 
 export default function ImageComposer(props: ImageComposerProps) {
-  const [text, setText] = useContext(TextContext);
-  const [isEditing, setIsEditing] = useState(false);
-  const [textWidth, setTextWidth] = useState(200);
-  const [position, setPosition] = useState([50, 80]);
-  const textRef = useRef<Konva.Text>(null);
-  const trRef = useRef<Konva.Transformer>(null);
+  const layers = useContext(LayersContext);
 
   useEffect(() => {
-    if (trRef.current && textRef.current) {
-      trRef.current.nodes([textRef.current]);
-    }
-  }, [isEditing]);
+    layers.map((layer) => {
+      if (layer.trRef.current && layer.textRef.current) {
+        layer.trRef.current.nodes([layer.textRef.current]);
+      }
+    });
+  }, [layers]);
 
-  const handleDragEnd = (evt: Konva.KonvaEventObject<DragEvent>) => {
-    const { x, y } = evt.target.attrs;
-    setPosition([x, y]);
-  };
-
-  const handleTextDblClick = useCallback(
-    (evt: Konva.KonvaEventObject<Event>) => {
-      requestAnimationFrame(() => setIsEditing(true));
-    },
-    []
-  );
-
-  const handleTextChange = useCallback((newText: string) => {
-    setText(newText);
-  }, []);
-
-  const handleTransform = useCallback((e: TransformEvent) => {
-    const node = textRef.current;
-    if (node) {
-      const scaleX = node.scaleX();
-      const newWidth = node.width() * scaleX;
-      node.setAttrs({
-        width: newWidth,
-        scaleX: 1,
-      });
-    }
-  }, []);
+  // const handleDragEnd = (evt: Konva.KonvaEventObject<DragEvent>) => {
+  //   const { x, y } = evt.target.attrs;
+  //   setPosition([x, y]);
+  // };
 
   return (
     <Stage
@@ -72,39 +44,49 @@ export default function ImageComposer(props: ImageComposerProps) {
           width={props.imgElement.naturalWidth}
           height={props.imgElement.naturalHeight}
         />
-        <Text
-          ref={textRef}
-          text={text}
-          x={position[0]}
-          y={position[1]}
-          fontSize={20}
-          draggable
-          width={textWidth}
-          onDblClick={handleTextDblClick}
-          onDblTap={handleTextDblClick}
-          onTransform={handleTransform}
-          onDragEnd={handleDragEnd}
-          visible={!isEditing}
-        />
+        {layers.map((layer, index) => (
+          <React.Fragment key={index}>
+            <Text
+              ref={layer.textRef}
+              text={layer.text}
+              x={layer.x}
+              y={layer.y}
+              fontSize={layer.fontSize}
+              fontStyle={layer.fontStyle}
+              align={layer.align}
+              opacity={layer.opacity}
+              fill={layer.fill}
+              draggable
+              width={layer.width}
+              onDblClick={(e) => layer.onDblClick(e, layer.id)}
+              onDblTap={(e) => layer.onDblClick(e, layer.id)}
+              onTransform={layer.onTransform}
+              // onDragEnd={handleDragEnd}
+              visible={!layer.isEditing}
+            />
 
-        {isEditing && textRef.current && (
-          <TextEditor
-            textNode={textRef.current}
-            onChange={handleTextChange}
-            onClose={() => setIsEditing(false)}
-          />
-        )}
-        {!isEditing && (
-          <Transformer
-            ref={trRef}
-            visible={!text ? isEditing : !isEditing}
-            enabledAnchors={["middle-left", "middle-right"]}
-            boundBoxFunc={(oldBox, newBox) => ({
-              ...newBox,
-              width: Math.max(30, newBox.width),
-            })}
-          />
-        )}
+            {layer.isEditing && layer.textRef.current && (
+              <TextEditor
+                textNode={layer.textRef.current}
+                onChange={(newText: string) =>
+                  layer.handleTextChange(layer.id, newText)
+                }
+                onClose={() => layer.setIsEditing(layer.id, false)}
+              />
+            )}
+            {!layer.isEditing && (
+              <Transformer
+                ref={layer.trRef}
+                visible={!layer.text ? layer.isEditing : !layer.isEditing}
+                enabledAnchors={["middle-left", "middle-right"]}
+                boundBoxFunc={(oldBox, newBox) => ({
+                  ...newBox,
+                  width: Math.max(30, newBox.width),
+                })}
+              />
+            )}
+          </React.Fragment>
+        ))}
       </Layer>
     </Stage>
   );
