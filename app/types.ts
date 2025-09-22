@@ -5,6 +5,7 @@ export type TextLayer = {
   text: string;
   x: number;
   y: number;
+  fontFamily: string;
   fontSize: number;
   fontStyle: string;
   align: string;
