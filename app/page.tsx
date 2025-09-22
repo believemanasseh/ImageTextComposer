@@ -1,21 +1,16 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Button, Input, Popover, Slider } from "antd";
 import { ExclamationCircleOutlined, UploadOutlined } from "@ant-design/icons";
 import toastr from "toastr";
 import Konva from "konva";
+import ImageComposer from "./components/ImageComposer";
 import ExportButton from "./components/ExportButton";
 import UndoRedoControls from "./components/UndoRedoControls";
 import LayerList from "./components/LayerList";
 import { TextLayer, TransformEvent } from "./types";
 import { LayersContext, TextContext } from "./contexts";
-
-const DynamicImageComposer = dynamic(
-  () => import("./components/ImageComposer"),
-  { ssr: false }
-);
 
 export default function Home() {
   const [text, setText] = useState<string | undefined>(undefined);
@@ -236,7 +231,7 @@ export default function Home() {
                     justifyContent: "center",
                   }}
                 >
-                  <DynamicImageComposer imgElement={imgElement} zoom={zoom} />
+                  <ImageComposer imgElement={imgElement} zoom={zoom} />
                 </div>
 
                 {/* Zoom control */}
