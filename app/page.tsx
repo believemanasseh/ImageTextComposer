@@ -83,13 +83,11 @@ export default function Home() {
     setRedoStack(redoStack.slice(0, -1));
   };
 
-  const handleTextChange = useCallback((id: number, newText: string) => {
+  const handleTextChange = (id: number, text: string) => {
     setLayers((prevLayers) =>
-      prevLayers.map((layer) =>
-        layer.id === id ? { ...layer, text: newText } : layer
-      )
+      prevLayers.map((layer) => (layer.id === id ? { ...layer, text } : layer))
     );
-  }, []);
+  };
 
   const setIsEditing = (id: number, isEditing: boolean) => {
     setLayers((prevLayers) =>

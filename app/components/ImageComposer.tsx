@@ -28,18 +28,6 @@ export default function ImageComposer(props: ImageComposerProps) {
     });
   }, [layers]);
 
-  const handleDragEnd = (
-    evt: Konva.KonvaEventObject<DragEvent>,
-    id: number
-  ) => {
-    const { x, y } = evt.target.attrs;
-    setLayers(
-      layers.map((layer) =>
-        id === layer.id ? { ...layer, x: x, y: y } : layer
-      )
-    );
-  };
-
   return (
     <Stage
       width={props.imgElement.naturalWidth * props.zoom}
@@ -69,7 +57,12 @@ export default function ImageComposer(props: ImageComposerProps) {
               onDblClick={(e) => layer.onDblClick(e, layer.id)}
               onDblTap={(e) => layer.onDblClick(e, layer.id)}
               onTransform={layer.onTransform}
-              onDragEnd={(e) => handleDragEnd(e, layer.id)}
+              onDragEnd={(e: Konva.KonvaEventObject<DragEvent>) => {
+                const { x, y } = e.target.attrs;
+                setLayers(
+                  layers.map((l) => (l.id === layer.id ? { ...l, x, y } : l))
+                );
+              }}
               visible={!layer.isEditing}
             />
 
