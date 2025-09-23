@@ -22,8 +22,6 @@ export default function Home() {
   const [zoom, setZoom] = useState(0.75);
   const [layers, setLayers] = useState<TextLayer[]>([]);
   const [redoStack, setRedoStack] = useState<TextLayer[]>([]);
-  const textRef = useRef<Konva.Text>(null);
-  const trRef = useRef<Konva.Transformer>(null);
 
   useEffect(() => {
     if (imageUrl) {
@@ -92,14 +90,6 @@ export default function Home() {
     );
   };
 
-  const setIsOpen = (id: number, isOpen: boolean) => {
-    setLayers((prevLayers) =>
-      prevLayers.map((layer) =>
-        layer.id === id ? { ...layer, isOpen } : layer
-      )
-    );
-  };
-
   const handleTextDblClick = useCallback(
     (evt: Konva.KonvaEventObject<Event>, id: number) => {
       requestAnimationFrame(() =>
@@ -113,17 +103,20 @@ export default function Home() {
     []
   );
 
-  const handleTransform = useCallback((e: TransformEvent) => {
-    const node = textRef.current;
-    if (node) {
-      const scaleX = node.scaleX();
-      const newWidth = node.width() * scaleX;
-      node.setAttrs({
-        width: newWidth,
-        scaleX: 1,
-      });
-    }
-  }, []);
+  const handleTransform = useCallback(
+    (e: TransformEvent, textRef: React.RefObject<Konva.Text | null>) => {
+      const node = textRef.current;
+      if (node) {
+        const scaleX = node.scaleX();
+        const newWidth = node.width() * scaleX;
+        node.setAttrs({
+          width: newWidth,
+          scaleX: 1,
+        });
+      }
+    },
+    []
+  );
 
   const namePopoverContent = (
     <div className="flex flex-col gap-2">
@@ -188,8 +181,8 @@ export default function Home() {
                         onDblTap: handleTextDblClick,
                         onTransform: handleTransform,
                         visible: true,
-                        textRef: textRef,
-                        trRef: trRef,
+                        textRef: React.createRef<Konva.Text>(),
+                        trRef: React.createRef<Konva.Transformer>(),
                         isEditing: false,
                         setIsEditing: setIsEditing,
                         handleTextChange: handleTextChange,

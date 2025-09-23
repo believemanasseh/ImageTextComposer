@@ -15,7 +15,10 @@ export type TextLayer = {
   width: number;
   onDblClick: (evt: Konva.KonvaEventObject<Event>, id: number) => void;
   onDblTap: (evt: Konva.KonvaEventObject<Event>, id: number) => void;
-  onTransform: (e: TransformEvent) => void;
+  onTransform: (
+    e: TransformEvent,
+    textRef: React.RefObject<Konva.Text | null>
+  ) => void;
   visible: boolean;
   textRef: React.RefObject<Konva.Text | null>;
   trRef: React.RefObject<Konva.Transformer | null>;
