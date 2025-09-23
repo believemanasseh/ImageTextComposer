@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Button, Input, Popover, Slider } from "antd";
+import { Button, Input, Popover, Slider, Tooltip } from "antd";
 import { ExclamationCircleOutlined, UploadOutlined } from "@ant-design/icons";
 import toastr from "toastr";
 import Konva from "konva";
@@ -213,16 +213,21 @@ export default function Home() {
                     onOpenChange={setEditingName}
                     placement="bottom"
                   >
-                    <h1 className="text-[#222] flex items-center gap-2 cursor-pointer">
+                    <h1
+                      className="text-[#222] flex items-center gap-2 cursor-pointer"
+                      onClick={handleEditName}
+                    >
                       {imageName || "Untitled Image"}
-                      <Button
-                        icon={
-                          <ExclamationCircleOutlined
-                            style={{ fontSize: "25px" }}
-                          />
-                        }
-                        onClick={handleEditName}
-                      />
+                      <Tooltip title="Click to edit image name">
+                        <Button
+                          icon={
+                            <ExclamationCircleOutlined
+                              style={{ fontSize: "25px" }}
+                            />
+                          }
+                          onClick={handleEditName}
+                        />
+                      </Tooltip>
                     </h1>
                   </Popover>
                   <ExportButton />
