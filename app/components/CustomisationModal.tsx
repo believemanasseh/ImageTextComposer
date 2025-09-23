@@ -1,19 +1,26 @@
 import React, { useContext, useState } from "react";
-import { Modal } from "antd";
+import { Modal, Spin } from "antd";
+import useSWR from "swr";
 import {
   AlignLeftOutlined,
   AlignCenterOutlined,
   AlignRightOutlined,
 } from "@ant-design/icons";
 import { LayersContext } from "../contexts";
-import { TextLayer } from "../types";
+import { FontItem, TextLayer } from "../types";
 
 type ModalProps = {
   layer: TextLayer;
   open: boolean;
 };
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export default function CustomisationModal(props: ModalProps) {
+  const { data, error, isLoading } = useSWR(
+    "https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyAAxzwn0sdk8uHdf9COO8YfIicSzM9pvh0",
+    fetcher
+  );
   const [layers, setLayers] = useContext(LayersContext);
   const [alignment, setAlignment] = useState({
     left: true,
@@ -48,6 +55,32 @@ export default function CustomisationModal(props: ModalProps) {
     >
       <h1 className="text-center text-lg font-semibold">{props.layer.text}</h1>
       <div className="flex flex-col gap-4 mt-4">
+        <label className="flex flex-col">
+          Font Family:
+          <select
+            value={props.layer.fontFamily}
+            onChange={(e) =>
+              setLayers(
+                layers.map((l) =>
+                  l.id === props.layer.id
+                    ? { ...l, fontFamily: e.target.value }
+                    : l
+                )
+              )
+            }
+            className="border border-gray-300 rounded px-2 py-1 mt-1"
+          >
+            {isLoading ? (
+              <Spin />
+            ) : (
+              data.items.map((obj: FontItem, index: number) => (
+                <option key={index} value={obj.family}>
+                  {obj.family}
+                </option>
+              ))
+            )}
+          </select>
+        </label>
         <label className="flex flex-col">
           Font Size:
           <input
