@@ -20,6 +20,7 @@ export type TextLayer = {
   textRef: React.RefObject<Konva.Text | null>;
   trRef: React.RefObject<Konva.Transformer | null>;
   isEditing: boolean;
+  isOpen: boolean;
   setIsEditing: (id: number, isEditing: boolean) => void;
   handleTextChange: (id: number, text: string) => void;
 };

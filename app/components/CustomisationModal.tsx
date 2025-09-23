@@ -11,7 +11,6 @@ import { TextLayer } from "../types";
 type ModalProps = {
   layer: TextLayer;
   open: boolean;
-  setOpen: (open: boolean) => void;
 };
 
 export default function CustomisationModal(props: ModalProps) {
@@ -22,8 +21,12 @@ export default function CustomisationModal(props: ModalProps) {
     right: false,
   });
 
-  const handleCancel = () => {
-    props.setOpen(false);
+  const handleCancel = (id: number) => {
+    setLayers(
+      layers.map((layer) =>
+        layer.id === id ? { ...layer, isOpen: false } : layer
+      )
+    );
   };
 
   const handleAlignmentClick = (e: React.MouseEvent<HTMLSpanElement>) => {
@@ -38,7 +41,11 @@ export default function CustomisationModal(props: ModalProps) {
   };
 
   return (
-    <Modal open={props.open} onCancel={handleCancel} footer={null}>
+    <Modal
+      open={props.open}
+      onCancel={() => handleCancel(props.layer.id)}
+      footer={null}
+    >
       <h1 className="text-center text-lg font-semibold">{props.layer.text}</h1>
       <div className="flex flex-col gap-4 mt-4">
         <label className="flex flex-col">

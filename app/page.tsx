@@ -92,6 +92,14 @@ export default function Home() {
     );
   };
 
+  const setIsOpen = (id: number, isOpen: boolean) => {
+    setLayers((prevLayers) =>
+      prevLayers.map((layer) =>
+        layer.id === id ? { ...layer, isOpen } : layer
+      )
+    );
+  };
+
   const handleTextDblClick = useCallback(
     (evt: Konva.KonvaEventObject<Event>, id: number) => {
       requestAnimationFrame(() =>
@@ -185,6 +193,7 @@ export default function Home() {
                         isEditing: false,
                         setIsEditing: setIsEditing,
                         handleTextChange: handleTextChange,
+                        isOpen: false,
                       },
                     ]);
                   }}

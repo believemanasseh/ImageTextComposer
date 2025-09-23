@@ -54,8 +54,24 @@ export default function ImageComposer(props: ImageComposerProps) {
               fill={layer.fill}
               draggable
               width={layer.width}
-              onDblClick={(e) => layer.onDblClick(e, layer.id)}
-              onDblTap={(e) => layer.onDblClick(e, layer.id)}
+              onDblClick={(e) =>
+                requestAnimationFrame(() =>
+                  setLayers(
+                    layers.map((l) =>
+                      layer.id === l.id ? { ...l, isEditing: true } : l
+                    )
+                  )
+                )
+              }
+              onDblTap={(e) =>
+                requestAnimationFrame(() =>
+                  setLayers(
+                    layers.map((l) =>
+                      layer.id === l.id ? { ...l, isEditing: true } : l
+                    )
+                  )
+                )
+              }
               onTransform={layer.onTransform}
               onDragEnd={(e: Konva.KonvaEventObject<DragEvent>) => {
                 const { x, y } = e.target.attrs;
