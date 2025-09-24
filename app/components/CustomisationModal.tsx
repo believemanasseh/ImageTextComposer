@@ -17,10 +17,7 @@ type ModalProps = {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function CustomisationModal(props: ModalProps) {
-  const { data, error, isLoading } = useSWR(
-    "https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyAAxzwn0sdk8uHdf9COO8YfIicSzM9pvh0",
-    fetcher
-  );
+  const { data, isLoading } = useSWR("/api/fonts", fetcher);
   const [layers, setLayers] = useContext(LayersContext);
   const [alignment, setAlignment] = useState({
     left: true,
