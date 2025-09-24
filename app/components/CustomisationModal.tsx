@@ -49,6 +49,7 @@ export default function CustomisationModal(props: ModalProps) {
       open={props.open}
       onCancel={() => handleCancel(props.layer.id)}
       footer={null}
+      width={600}
     >
       <h1 className="text-center text-lg font-semibold">{props.layer.text}</h1>
       <div className="flex flex-col gap-4 mt-4">
@@ -70,11 +71,21 @@ export default function CustomisationModal(props: ModalProps) {
             {isLoading ? (
               <Spin />
             ) : (
-              data.items.map((obj: FontItem, index: number) => (
-                <option key={index} value={obj.family}>
-                  {obj.family}
-                </option>
-              ))
+              data.items.map((obj: FontItem, index: number) => {
+                if (obj.family === "Aref Ruqaa Ink") {
+                  return (
+                    <React.Fragment key={index}>
+                      <option value={obj.family}>{obj.family}</option>
+                      <option value="Arial">Arial</option>
+                    </React.Fragment>
+                  );
+                }
+                return (
+                  <option key={index} value={obj.family}>
+                    {obj.family}
+                  </option>
+                );
+              })
             )}
           </select>
         </label>
@@ -214,6 +225,42 @@ export default function CustomisationModal(props: ModalProps) {
               }
               className="border border-gray-300 rounded px-2 py-1 mt-1 w-16"
             />
+          </label>
+          <label className="flex flex-col">
+            <button
+              onClick={() => {
+                const index = layers.findIndex(
+                  (layer) => layer.id === props.layer.id
+                );
+                if (index > 0) {
+                  const newLayers = [...layers];
+                  const [movedLayer] = newLayers.splice(index, 1);
+                  newLayers.splice(index - 1, 0, movedLayer);
+                  setLayers(newLayers);
+                }
+              }}
+              className="border border-gray-300 hover:bg-blue-500 hover:text-white rounded w-[100px] mt-7"
+            >
+              Move up
+            </button>
+          </label>
+          <label className="flex flex-col">
+            <button
+              onClick={() => {
+                const index = layers.findIndex(
+                  (layer) => layer.id === props.layer.id
+                );
+                if (index >= 0 && index < layers.length - 1) {
+                  const newLayers = [...layers];
+                  const [movedLayer] = newLayers.splice(index, 1);
+                  newLayers.splice(index + 1, 0, movedLayer);
+                  setLayers(newLayers);
+                }
+              }}
+              className="border border-gray-300 hover:bg-blue-500 hover:text-white rounded w-[100px] mt-7"
+            >
+              Move down
+            </button>
           </label>
         </div>
       </div>

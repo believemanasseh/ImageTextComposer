@@ -169,7 +169,7 @@ export default function Home() {
                         text: "New Text",
                         x: 600,
                         y: 400,
-                        fontFamily: "Dancing Script",
+                        fontFamily: "Kavivanar",
                         fontSize: 30,
                         fontStyle: "normal",
                         align: "left",
