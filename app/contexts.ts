@@ -8,3 +8,7 @@ export const LayersContext = createContext<
 export const TextContext = createContext<
   [string | undefined, (newText: string) => void]
 >([undefined, () => {}]);
+
+export const ExportContext = createContext<
+  [boolean, (isExporting: boolean) => void]
+>([false, () => {}]);

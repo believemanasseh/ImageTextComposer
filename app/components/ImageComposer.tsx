@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext, useRef } from "react";
 import {
   Stage,
   Layer,
@@ -10,15 +10,17 @@ import {
 } from "react-konva";
 import Konva from "konva";
 import TextEditor from "./TextEditor";
-import { LayersContext } from "../contexts";
+import { LayersContext, ExportContext } from "../contexts";
 
 type ImageComposerProps = {
   imgElement: HTMLImageElement;
   zoom: number;
+  stageRef: React.RefObject<Konva.Stage | null>;
 };
 
 export default function ImageComposer(props: ImageComposerProps) {
   const [layers, setLayers] = useContext(LayersContext);
+  const [isExporting, setIsExporting] = useContext(ExportContext);
 
   useEffect(() => {
     layers.map((layer) => {
@@ -33,6 +35,7 @@ export default function ImageComposer(props: ImageComposerProps) {
       width={props.imgElement.naturalWidth * props.zoom}
       height={props.imgElement.naturalHeight * props.zoom}
       scale={{ x: props.zoom, y: props.zoom }}
+      ref={props.stageRef}
     >
       <Layer>
         <KonvaImage
@@ -91,10 +94,15 @@ export default function ImageComposer(props: ImageComposerProps) {
                 onClose={() => layer.setIsEditing(layer.id, false)}
               />
             )}
+
             {!layer.isEditing && (
               <Transformer
                 ref={layer.trRef}
-                visible={!layer.text ? layer.isEditing : !layer.isEditing}
+                visible={
+                  !layer.text || isExporting
+                    ? layer.isEditing
+                    : !layer.isEditing
+                }
                 enabledAnchors={["middle-left", "middle-right"]}
                 boundBoxFunc={(oldBox, newBox) => ({
                   ...newBox,
