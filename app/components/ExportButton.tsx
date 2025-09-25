@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext } from "react";
-import Konva from "konva";
+import type Konva from "konva";
 import { Button } from "antd";
 import { ExportOutlined } from "@ant-design/icons";
 import { ExportContext } from "../contexts";

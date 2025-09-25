@@ -1,4 +1,4 @@
-import Konva from "konva";
+import type Konva from "konva";
 import { useEffect, useRef } from "react";
 import { Html } from "react-konva-utils";
 

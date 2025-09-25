@@ -4,12 +4,12 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Button, Input, Popover, Slider, Tooltip } from "antd";
 import { ExclamationCircleOutlined, UploadOutlined } from "@ant-design/icons";
 import toastr from "toastr";
-import Konva from "konva";
+import type Konva from "konva";
 import ImageComposer from "./components/ImageComposer";
 import ExportButton from "./components/ExportButton";
 import UndoRedoControls from "./components/UndoRedoControls";
 import LayerList from "./components/LayerList";
-import { TextLayer, TransformEvent } from "./types";
+import type { TextLayer, TransformEvent } from "./types";
 import { LayersContext, TextContext, ExportContext } from "./contexts";
 
 export default function Home() {
