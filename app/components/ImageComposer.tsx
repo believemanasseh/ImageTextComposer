@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useContext, useRef } from "react";
+import React, { useEffect, useContext } from "react";
 import {
   Stage,
   Layer,
@@ -8,7 +8,7 @@ import {
   Text,
   Transformer,
 } from "react-konva";
-import Konva from "konva";
+import type Konva from "konva";
 import TextEditor from "./TextEditor";
 import { LayersContext, ExportContext } from "../contexts";
 
