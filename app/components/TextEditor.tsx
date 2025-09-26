@@ -20,7 +20,7 @@ const TextEditor = (props: TextEditorProps) => {
 
       const stage = textNode.getStage();
       const textPosition = textNode.position();
-      const stageBox = stage?.container().getBoundingClientRect();
+      stage?.container().getBoundingClientRect();
 
       const areaPosition = {
         x: textPosition?.x,

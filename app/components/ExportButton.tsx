@@ -12,7 +12,7 @@ type ExportButtonProps = {
 };
 
 export default function ExportButton(props: ExportButtonProps) {
-  const [isExporting, setIsExporting] = useContext(ExportContext);
+  const [, setIsExporting] = useContext(ExportContext);
 
   const handleExport = () => {
     if (!props.stageRef?.current) return;

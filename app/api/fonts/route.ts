@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   const key = process.env.GOOGLE_FONTS_API_KEY;
   if (!key) return NextResponse.json({ error: "missing key" }, { status: 500 });
 

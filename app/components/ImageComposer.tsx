@@ -20,7 +20,7 @@ type ImageComposerProps = {
 
 export default function ImageComposer(props: ImageComposerProps) {
   const [layers, setLayers] = useContext(LayersContext);
-  const [isExporting, setIsExporting] = useContext(ExportContext);
+  const [isExporting] = useContext(ExportContext);
 
   useEffect(() => {
     layers.map((layer) => {
