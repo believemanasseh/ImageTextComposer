@@ -19,6 +19,7 @@ export default function Home() {
   const [editingName, setEditingName] = useState(false);
   const [tempName, setTempName] = useState("");
   const [isExporting, setIsExporting] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const [imgElement, setImgElement] = useState<HTMLImageElement | null>(null);
   const [zoom, setZoom] = useState(0.75);
   const [layers, setLayers] = useState<TextLayer[]>([]);
@@ -32,6 +33,12 @@ export default function Home() {
       img.onload = () => setImgElement(img);
     }
   }, [imageUrl]);
+
+  useEffect(() => {
+    const onResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   const handleManualUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files as FileList;
@@ -137,148 +144,158 @@ export default function Home() {
     <TextContext value={[text, setText]}>
       <LayersContext value={[layers, setLayers]}>
         <ExportContext value={[isExporting, setIsExporting]}>
-          <main className="pt-10 flex items-center justify-center min-h-screen bg-[#f5f6fa]">
-            {!imgElement ? (
-              <div className="flex flex-col gap-5 w-[960px] m-auto p-5 items-center justify-center rounded-lg shadow-md bg-[whitesmoke]">
-                <h1 className="text-2xl text-[#222]">Image Text Composer</h1>
-                <p className="text-gray-500">
-                  Upload a PNG image and overlay it with fully customisable
-                  text.
-                </p>
-                <Button
-                  type="primary"
-                  onClick={handleImageUpload}
-                  icon={<UploadOutlined />}
-                >
-                  Upload your image
-                </Button>
-                <input
-                  id="imageUpload"
-                  type="file"
-                  onChange={handleManualUpload}
-                  className="hidden"
-                  accept=".png"
-                />
-              </div>
-            ) : (
-              <div className="flex flex-row justify-center w-full h-full gap-2">
-                <aside className="w-64 p-4 bg-white border-r border-[#e5e7eb] flex flex-col gap-4">
+          {isDesktop ? (
+            <main className="pt-10 flex items-center justify-center h-screen bg-[#f5f6fa]">
+              {!imgElement ? (
+                <div className="flex flex-col gap-5 items-center justify-center w-[960px] m-auto p-5  rounded-lg shadow-md bg-[whitesmoke]">
+                  <h1 className="text-2xl text-[#222]">Image Text Composer</h1>
+                  <p className="text-gray-500">
+                    Upload a PNG image and overlay it with fully customisable
+                    text.
+                  </p>
                   <Button
                     type="primary"
-                    onClick={() => {
-                      setLayers([
-                        ...layers,
-                        {
-                          id: Date.now(),
-                          text: "New Text",
-                          x: 600,
-                          y: 400,
-                          fontFamily: "Kavivanar",
-                          fontSize: 30,
-                          fontStyle: "normal",
-                          align: "left",
-                          opacity: 0.75,
-                          fill: "black",
-                          draggable: true,
-                          width: 200,
-                          onDblClick: handleTextDblClick,
-                          onDblTap: handleTextDblClick,
-                          onTransform: handleTransform,
-                          visible: true,
-                          textRef: React.createRef<Konva.Text>(),
-                          trRef: React.createRef<Konva.Transformer>(),
-                          isEditing: false,
-                          setIsEditing: setIsEditing,
-                          handleTextChange: handleTextChange,
-                          isOpen: false,
-                        },
-                      ]);
-                    }}
-                    block
+                    onClick={handleImageUpload}
+                    icon={<UploadOutlined />}
                   >
-                    Add Text
+                    Upload your image
                   </Button>
-                  <LayerList />
-                </aside>
-                <section>
-                  <div className="flex items-center justify-between border-b border-[#e5e7eb] gap-4">
-                    <div className="flex flex-row gap-2">
-                      <UndoRedoControls
-                        onRedo={handleRedo}
-                        onUndo={handleUndo}
-                      />
-                      <Button
-                        type="primary"
-                        danger
-                        onClick={() => setLayers([])}
-                      >
-                        Reset
-                      </Button>
-                    </div>
-                    <Popover
-                      content={namePopoverContent}
-                      trigger="click"
-                      open={editingName}
-                      onOpenChange={setEditingName}
-                      placement="bottom"
+                  <input
+                    id="imageUpload"
+                    type="file"
+                    onChange={handleManualUpload}
+                    className="hidden"
+                    accept=".png"
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-row justify-center w-full h-full gap-2">
+                  <aside className="w-64 p-4 bg-white border-r border-[#e5e7eb] flex flex-col gap-4">
+                    <Button
+                      type="primary"
+                      onClick={() => {
+                        setLayers([
+                          ...layers,
+                          {
+                            id: Date.now(),
+                            text: "New Text",
+                            x: 600,
+                            y: 400,
+                            fontFamily: "Kavivanar",
+                            fontSize: 30,
+                            fontStyle: "normal",
+                            align: "left",
+                            opacity: 0.75,
+                            fill: "black",
+                            draggable: true,
+                            width: 200,
+                            onDblClick: handleTextDblClick,
+                            onDblTap: handleTextDblClick,
+                            onTransform: handleTransform,
+                            visible: true,
+                            textRef: React.createRef<Konva.Text>(),
+                            trRef: React.createRef<Konva.Transformer>(),
+                            isEditing: false,
+                            setIsEditing: setIsEditing,
+                            handleTextChange: handleTextChange,
+                            isOpen: false,
+                          },
+                        ]);
+                      }}
+                      block
                     >
-                      <h1
-                        className="text-[#222] flex items-center gap-2 cursor-pointer"
-                        onClick={handleEditName}
+                      Add Text
+                    </Button>
+                    <LayerList />
+                  </aside>
+                  <section>
+                    <div className="flex items-center justify-between border-b border-[#e5e7eb] gap-4">
+                      <div className="flex flex-row gap-2">
+                        <UndoRedoControls
+                          onRedo={handleRedo}
+                          onUndo={handleUndo}
+                        />
+                        <Button
+                          type="primary"
+                          danger
+                          onClick={() => setLayers([])}
+                        >
+                          Reset
+                        </Button>
+                      </div>
+                      <Popover
+                        content={namePopoverContent}
+                        trigger="click"
+                        open={editingName}
+                        onOpenChange={setEditingName}
+                        placement="bottom"
                       >
-                        {imageName || "Untitled Image"}
-                        <Tooltip title="Click to edit image name">
-                          <Button
-                            icon={
-                              <ExclamationCircleOutlined
-                                style={{ fontSize: "25px" }}
-                              />
-                            }
-                            onClick={handleEditName}
-                          />
-                        </Tooltip>
-                      </h1>
-                    </Popover>
-                    <ExportButton stageRef={stageRef} imageName={imageName} />
-                  </div>
+                        <h1
+                          className="text-[#222] flex items-center gap-2 cursor-pointer"
+                          onClick={handleEditName}
+                        >
+                          {imageName || "Untitled Image"}
+                          <Tooltip title="Click to edit image name">
+                            <Button
+                              icon={
+                                <ExclamationCircleOutlined
+                                  style={{ fontSize: "25px" }}
+                                />
+                              }
+                              onClick={handleEditName}
+                            />
+                          </Tooltip>
+                        </h1>
+                      </Popover>
+                      <ExportButton stageRef={stageRef} imageName={imageName} />
+                    </div>
 
-                  <div
-                    style={{
-                      width: "80vw",
-                      height: "80vh",
-                      overflow: "hidden",
-                      border: "1px solid #e5e7eb",
-                      background: "#f8fafc",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <ImageComposer
-                      stageRef={stageRef}
-                      imgElement={imgElement}
-                      zoom={zoom}
-                    />
-                  </div>
+                    <div
+                      style={{
+                        width: "80vw",
+                        height: "80vh",
+                        overflow: "hidden",
+                        border: "1px solid #e5e7eb",
+                        background: "#f8fafc",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <ImageComposer
+                        stageRef={stageRef}
+                        imgElement={imgElement}
+                        zoom={zoom}
+                      />
+                    </div>
 
-                  {/* Zoom control */}
-                  <div className="mt-4 flex items-center justify-center gap-4">
-                    <label htmlFor="zoom-slider">Zoom:</label>
-                    <Slider
-                      id="zoom-slider"
-                      min={0.1}
-                      max={3}
-                      step={0.01}
-                      value={zoom}
-                      onChange={setZoom}
-                      style={{ width: 200 }}
-                    />
-                    <span>{(zoom * 100).toFixed(0)}%</span>
-                  </div>
-                </section>
-              </div>
-            )}
-          </main>
+                    {/* Zoom control */}
+                    <div className="mt-4 flex items-center justify-center gap-4">
+                      <label htmlFor="zoom-slider">Zoom:</label>
+                      <Slider
+                        id="zoom-slider"
+                        min={0.1}
+                        max={3}
+                        step={0.01}
+                        value={zoom}
+                        onChange={setZoom}
+                        style={{ width: 200 }}
+                      />
+                      <span>{(zoom * 100).toFixed(0)}%</span>
+                    </div>
+                  </section>
+                </div>
+              )}
+            </main>
+          ) : (
+            <main className="flex flex-col justify-center items-center h-screen p-6">
+              <h2 className="text-lg font-semibold">Desktop only</h2>
+              <p className="text-sm text-gray-500">
+                This editor is designed for desktop. Please open on a larger
+                screen.
+              </p>
+            </main>
+          )}
         </ExportContext>
       </LayersContext>
     </TextContext>
