@@ -19,7 +19,7 @@ export default function Home() {
   const [editingName, setEditingName] = useState(false);
   const [tempName, setTempName] = useState("");
   const [isExporting, setIsExporting] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(true);
   const [imgElement, setImgElement] = useState<HTMLImageElement | null>(null);
   const [zoom, setZoom] = useState(0.75);
   const [layers, setLayers] = useState<TextLayer[]>([]);
