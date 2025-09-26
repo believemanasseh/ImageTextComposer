@@ -36,6 +36,7 @@ export default function Home() {
 
   useEffect(() => {
     const onResize = () => setIsDesktop(window.innerWidth >= 1024);
+    onResize(); // Initial check
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
