@@ -202,7 +202,19 @@ export default function Home() {
                 </aside>
                 <section>
                   <div className="flex items-center justify-between border-b border-[#e5e7eb] gap-4">
-                    <UndoRedoControls onRedo={handleRedo} onUndo={handleUndo} />
+                    <div className="flex flex-row gap-2">
+                      <UndoRedoControls
+                        onRedo={handleRedo}
+                        onUndo={handleUndo}
+                      />
+                      <Button
+                        type="primary"
+                        danger
+                        onClick={() => setLayers([])}
+                      >
+                        Reset
+                      </Button>
+                    </div>
                     <Popover
                       content={namePopoverContent}
                       trigger="click"
