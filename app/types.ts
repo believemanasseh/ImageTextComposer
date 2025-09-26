@@ -13,6 +13,8 @@ export type TextLayer = {
   fill: string;
   draggable: boolean;
   width: number;
+  lineHeight: number;
+  letterSpacing: number;
   onDblClick: (evt: Konva.KonvaEventObject<Event>, id: number) => void;
   onDblTap: (evt: Konva.KonvaEventObject<Event>, id: number) => void;
   onTransform: (

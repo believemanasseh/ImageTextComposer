@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Modal, Spin } from "antd";
 import useSWR from "swr";
 import {
@@ -226,6 +226,48 @@ export default function CustomisationModal(props: ModalProps) {
               className="border border-gray-300 rounded px-2 py-1 mt-1 w-16"
             />
           </label>
+          <label className="flex flex-col">
+            Line Height:
+            <input
+              type="number"
+              step="0.1"
+              min="1"
+              max="5"
+              value={props.layer.lineHeight}
+              onChange={(e) =>
+                setLayers(
+                  layers.map((l) =>
+                    l.id === props.layer.id
+                      ? { ...l, lineHeight: Number(e.target.value) }
+                      : l
+                  )
+                )
+              }
+              className="border border-gray-300 rounded px-2 py-1 mt-1 w-16"
+            />
+          </label>
+          <label className="flex flex-col">
+            Letter Spacing:
+            <input
+              type="number"
+              step="0.1"
+              min="0"
+              max="20"
+              value={props.layer.letterSpacing}
+              onChange={(e) =>
+                setLayers(
+                  layers.map((l) =>
+                    l.id === props.layer.id
+                      ? { ...l, letterSpacing: Number(e.target.value) }
+                      : l
+                  )
+                )
+              }
+              className="border border-gray-300 rounded px-2 py-1 mt-1 w-16"
+            />
+          </label>
+        </div>
+        <div className="flex flex-row gap-5">
           <label className="flex flex-col">
             <button
               onClick={() => {
