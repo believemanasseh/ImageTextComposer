@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: "Image Text Composer",
   description:
     "Image editing tool that enables users to upload a PNG image and overlay it with fully customisable text.",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({
