@@ -50,6 +50,7 @@ export default function ImageComposer(props: ImageComposerProps) {
               text={layer.text}
               x={layer.x}
               y={layer.y}
+              fontFamily={layer.fontFamily}
               fontSize={layer.fontSize}
               fontStyle={layer.fontStyle}
               lineHeight={layer.lineHeight}
