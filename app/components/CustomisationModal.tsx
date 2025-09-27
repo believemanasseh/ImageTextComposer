@@ -59,7 +59,9 @@ const loadFont = async (
         loadedFonts[fontName] = true;
         return;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   const timesWidth = measureFont("Times", "Times", fontStyle, fontWeight);
